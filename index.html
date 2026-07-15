@@ -289,7 +289,7 @@
 
             <div class="w-20 h-20 bg-fuchsia-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-fuchsia-500/20 floating">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4 L19 7" />
                 </svg>
             </div>
 
@@ -298,14 +298,18 @@
             </h2>
             <p class="text-slate-400 text-sm mb-6">Has superado el cuarto y último volumen de condicionales con un éxito rotundo. ¡Estadísticas finales!</p>
 
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
-                    <span class="text-xs text-slate-400 block mb-1">Aciertos con Desafío</span>
-                    <span id="final-score" class="text-3xl font-extrabold text-amber-400">0 / 10</span>
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col justify-center">
+                    <span class="text-[10px] text-slate-400 block mb-1 uppercase font-bold tracking-wider">Aciertos</span>
+                    <span id="final-score" class="text-xl font-extrabold text-amber-400">0 / 10</span>
                 </div>
-                <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800">
-                    <span class="text-xs text-slate-400 block mb-1">Puntos de Precisión</span>
-                    <span id="accuracy" class="text-3xl font-extrabold text-fuchsia-400">100%</span>
+                <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col justify-center">
+                    <span class="text-[10px] text-slate-400 block mb-1 uppercase font-bold tracking-wider">Precisión</span>
+                    <span id="accuracy" class="text-xl font-extrabold text-fuchsia-400">100%</span>
+                </div>
+                <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col justify-center">
+                    <span class="text-[10px] text-slate-400 block mb-1 uppercase font-bold tracking-wider">Intentos</span>
+                    <span id="deck-attempts-display" class="text-xl font-extrabold text-cyan-400">1</span>
                 </div>
             </div>
 
@@ -592,6 +596,7 @@
         let activeMode = 'challenge'; // Exclusivo modo Desafío
         let hasCheckedCurrentChallenge = false;
         let studentName = "Estudiante";
+        let deckAttemptsCount = 1; // Contador de rondas/intentos completos del mazo de cartas
 
         // Configurar UI al cargar el documento
         document.addEventListener('DOMContentLoaded', () => {
@@ -873,14 +878,13 @@
             document.getElementById('final-score').innerText = `${score} / 10`;
             document.getElementById('accuracy').innerText = `${accuracyPercent}%`;
             document.getElementById('display-student-name').innerText = studentName;
+            document.getElementById('deck-attempts-display').innerText = deckAttemptsCount;
 
             const finishMsgEl = document.getElementById('finish-message');
-            if (score >= 9) {
-                finishMsgEl.innerText = `🏆 ¡Absolutamente épico, ${studentName}! Has finalizado la colección con una precisión espectacular en el Volumen 4. ¡Dominas los condicionales B1 al 100%!`;
-            } else if (score >= 6) {
-                finishMsgEl.innerText = `✨ ¡Trabajo impecable, ${studentName}! Has demostrado un nivel sólido. El último tramo de condicionales está en tu poder.`;
+            if (score === 10) {
+                finishMsgEl.innerHTML = `🏆 <strong>¡Meta alcanzada, ${studentName}!</strong> Has completado todos los ejercicios perfectamente con un <strong>10/10</strong> en un total de <strong>${deckAttemptsCount} intento(s)</strong> de la baraja. ¡Eres un auténtico as de la gramática B1!`;
             } else {
-                finishMsgEl.innerText = `📚 ¡Has completado la práctica del Volumen 4, ${studentName}! Prueba repitiendo el mazo en Modo Estudio para afianzar aquellas estructuras complejas.`;
+                finishMsgEl.innerHTML = `📚 ¡Excelente esfuerzo, ${studentName}! Has logrado <strong>${score}/10</strong> en tu intento número <strong>${deckAttemptsCount}</strong>.<br><span class="text-fuchsia-400 font-semibold">¿Quieres reiniciar y conseguir el 10/10 perfecto? ¡A por ello!</span>`;
             }
 
             document.getElementById('modal-finished').classList.remove('hidden');
@@ -889,6 +893,15 @@
         function resetGame() {
             playSynthesizerSound('click');
             currentIndex = 0;
+            
+            // Si ya lograron completar perfectamente todos los ejercicios (10/10), el contador vuelve a empezar en 1.
+            // Si aún no logran el 10/10, incrementamos los intentos de ronda de la baraja para animarlos.
+            if (score === 10) {
+                deckAttemptsCount = 1;
+            } else {
+                deckAttemptsCount++;
+            }
+
             score = 0;
             totalAttempts = 0;
             document.getElementById('modal-finished').classList.add('hidden');
